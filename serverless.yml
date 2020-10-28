@@ -28,7 +28,7 @@ provider:
               Ref: "AWS::AccountId"
     - Effect: "Allow"
       Action:
-        - states:*
+        - states:StartExecution
       Resource:
         Fn::Sub:
           - "arn:aws:states:${self:provider.region}:${accountId}:stateMachine:aqts-capture-load-*"
