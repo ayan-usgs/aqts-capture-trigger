@@ -10,6 +10,30 @@ provider:
   logRetentionInDays: 90
   deploymentBucket:
     name: ${opt:bucket, 'iow-cloud-applications'}
+  rolePermissionsBoundary:
+    Fn::Sub:
+      - "arn:aws:iam::${accountId}:policy/csr-Developer-Permissions-Boundary"
+      - accountId:
+          Ref: "AWS::AccountId"
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action:
+        - sqs:DeleteMessage
+        - sqs:GetQueueAttributes
+        - sqs:RecieveMessage
+      Resource:
+        Fn::Sub:
+          - "arn:aws:sqs:${self:provider.region}:${accountId}:aqts-capture-*"
+          - accountId:
+              Ref: "AWS::AccountId"
+    - Effect: 'Allow'
+      Action:
+        - states:*
+      Resource:
+        Fn::Sub:
+          - "arn:aws:states:${self:provider.region}:${accountId}:stateMachine:aqts-capture-load-*"
+          - accountId:
+              Ref: "AWS::AccountId"
   stackTags:
     "wma:applicationId": "Aquarius TS Capture Trigger"
     "wma:contact": "Andrew Yan ayan@usgs.gov"
@@ -42,7 +66,7 @@ functions:
 #        - "arn:aws:iam::${accountId}:role/csr-Lambda-Role"
 #        - accountId:
 #            Ref: "AWS::AccountId"
-    role: arn:aws:iam::#{AWS::AccountId}:role/csr-Lambda-Role
+#    role: arn:aws:iam::#{AWS::AccountId}:role/csr-Lambda-Role
     onError:
       Ref: snsTopic
     events:
